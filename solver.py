@@ -8,8 +8,17 @@ def solve(tasks):
     Returns:
         output: list of igloos in order of polishing  
     """
-    return [1]
-    pass
+    possible = {}
+    for i in tasks:
+    	d = i.get_duration();
+    	dead = i.get_deadline();
+    	ide = i.get_task_id();
+
+    	for j in range(d, 1440):
+    		toAdd = {start: j - d, end: j, profit: i.get_late_benefit(max(0, j - end)), ID: ide}
+    		possible.push(toAdd)
+
+    
 
 
 # Here's an example of how to run your solver.
