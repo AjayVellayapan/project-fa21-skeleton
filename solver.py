@@ -15,7 +15,7 @@ def solve(tasks):
 
 
 def getMaxProfit(tasks):
-    dp = [([0] * 1441) for i in range(len(tasks) + 1)]
+    dp = [([0] * 1441) for _ in range(len(tasks) + 1)]
     for t in range(0, 1440 + 1):
         dp[-1][t] = 0
 
