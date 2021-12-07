@@ -14,17 +14,17 @@ def solve(tasks):
 def getMaxProfit(tasks):
     dp = [len(tasks) + 1][1440 + 1]
     for t in range(0, 1440 + 1):
-        dp[0][t] = 0
+        dp[-1][t] = 0
 
     # Go through every igloo/task
-    for i in range(1, len(tasks) + 1):
+    for i in range(len(tasks)):
         # Go through every t 0->1440 inclusive
         for t in range(0, 1441):
-            startTime = t - tasks[i - 1].get_duration()
+            startTime = t - tasks[i].get_duration()
             if startTime < 0:
                 dp[i][t] = dp[i - 1][t]
             else:
-                potentialProfit = tasks[i].get_late_benefit(max(0, t - tasks[i - 1].get_deadline()))
+                potentialProfit = tasks[i].get_late_benefit(max(0, t - tasks[i].get_deadline()))
                 dp[i][t] = max(dp[i-1][t], potentialProfit + dp[i - 1][t])
     return dp
 
