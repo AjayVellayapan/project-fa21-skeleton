@@ -9,6 +9,9 @@ def solve(tasks):
         output: list of igloos in order of polishing  
     """
     postProcessArray = getMaxProfit(tasks)
+    result = []
+    goThrough(postProcessArray, result, len(tasks) - 1, 1440, tasks)
+    return result
 
 
 def getMaxProfit(tasks):
@@ -28,7 +31,19 @@ def getMaxProfit(tasks):
                 dp[i][t] = max(dp[i-1][t], potentialProfit + dp[i - 1][t])
     return dp
 
-    
+def goThrough(dp, res, i, t, tasks):
+
+    if i == -1:
+        return
+    if dp[i-1][t] == dp[i][t]:
+        goThrough(dp, res, i-1, t, tasks)
+    else:
+        newT = min(t, tasks[i].get_deadline()) - tasks[i].get_duration
+        goThrough(dp, res, i - 1, newT, tasks)
+        res.append(i)
+       
+
+
 
 
 # Here's an example of how to run your solver.
