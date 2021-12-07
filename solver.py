@@ -8,15 +8,25 @@ def solve(tasks):
     Returns:
         output: list of igloos in order of polishing  
     """
-    possible = {}
-    for i in tasks:
-    	d = i.get_duration();
-    	dead = i.get_deadline();
-    	ide = i.get_task_id();
+    postProcessArray = getMaxProfit(tasks)
 
-    	for j in range(d, 1440):
-    		toAdd = {start: j - d, end: j, profit: i.get_late_benefit(max(0, j - end)), ID: ide}
-    		possible.push(toAdd)
+
+def getMaxProfit(tasks):
+    dp = [len(tasks) + 1][1440 + 1]
+    for t in range(0, 1440 + 1):
+        dp[0][t] = 0
+
+    # Go through every igloo/task
+    for i in range(len(tasks)):
+        # Go through every t 0->1440 inclusive
+        for t in range(0, 1441):
+            startTime = t - tasks[i].get_duration()
+            if startTime < 0:
+                dp[i][t] = dp[i - 1][t]
+            else:
+                potentialProfit = tasks[i].get_late_benefit(max(0, t - tasks[i].get_deadline()))
+                dp[i][t] = max(dp[i-1][t], potentialProfit + dp[i - 1][t])
+    return dp
 
     
 
