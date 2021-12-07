@@ -8,44 +8,50 @@ def solve(tasks):
     Returns:
         output: list of igloos in order of polishing  
     """
-    postProcessArray = getMaxProfit(tasks)
-    result = [-1] * 1441 
-    final = []
-    goThrough(postProcessArray, result, len(tasks) - 1, 1440, tasks)
-    for i in result:
-        if i != -1:
-            final.append(i)
-    return final
+    possible = []
+    for i in tasks:
+        dead = i.get_deadline()
+        dur = i.get_duration()
+        ide = i.get_task_id()
+        for n in range(dead, dead + 10):
+            points = i.get_late_benefit(n - dead)
+            toAdd = {'tid': ide, 'start': n - dur, 'end': n}
+            rate = points/dur
+            possible.append((rate, toAdd))
 
+    possible.sort(key=lambda x: x[0], reverse=True)
 
-def getMaxProfit(tasks):
-    dp = [([0] * 1441) for _ in range(len(tasks) + 1)]
-    for t in range(0, 1440 + 1):
-        dp[-1][t] = 0
+    answer = []
+    spaces = [-1] * 1440
 
-    # Go through every igloo/task
-    for i in range(len(tasks)):
-        # Go through every t 0->1440 inclusive
-        for t in range(0, 1441):
-            startTime = t - tasks[i].get_duration()
-            if startTime < 0:
-                dp[i][t] = dp[i - 1][t]
-            else:
-                potentialProfit = tasks[i].get_late_benefit(max(0, t - tasks[i].get_deadline()))
-                dp[i][t] = max(dp[i-1][t], potentialProfit + dp[i - 1][startTime])
-    return dp
+    for t in possible:
+        d = t[1]
+        if d['tid'] in answer:
+            continue
+        x = spaces[d['start'] : d['end']]
+        if all(elm == -1 for elm in x):
+            answer.append(d['tid'])
+            spaces[d['start'] : d['end']] = [d['tid']] * (d['end'] - d['start'])
+        else:
+            count = (d['end'] - d['start'])
+            removal = []
+            for i in range(0, d['start']):
+                if spaces[i] == -1:
+                    removal.append(i)
+                if (len(removal) == count):
+                    break
+            if (len(removal) == count):
+                for x in range(count):
+                    spaces[(removal[x] - x):d['end']] = spaces[(removal[x]+1-x):d['end']] + [0]
+                answer.append(d['tid'])
+                spaces[d['start'] : d['end']] = [d['tid']] * (d['end'] - d['start'])
 
-def goThrough(dp, res, i, t, tasks):
+    resy = []
+    for i in spaces:
+        if i > 0 and i not in resy:
+            resy.append(i)
 
-    if i == -1:
-        return
-    if dp[i-1][t] == dp[i][t]:
-        goThrough(dp, res, i-1, t, tasks)
-    else:
-        newT = t - tasks[i].get_duration()
-        goThrough(dp, res, i - 1, newT, tasks)
-        res[t] = i + 1
-       
+    return resy
 
 
 
