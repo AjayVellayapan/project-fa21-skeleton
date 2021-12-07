@@ -9,27 +9,50 @@ def solve(tasks):
         output: list of igloos in order of polishing  
     """
     postProcessArray = getMaxProfit(tasks)
-    result = []
-    goThrough(postProcessArray, result, len(tasks) - 1, 1440, tasks)
-    return result
+    result = [-1] * 1441
+
+    #goThrough(postProcessArray, result, len(tasks) - 1, 1440, tasks)
+    finalResult = []
+    #for igloo in result:
+    #    if igloo != -1:
+    #        finalResult.append(igloo)
+    for x in postProcessArray:
+        if x != -1:
+            finalResult.append(x)
+    return finalResult
 
 
 def getMaxProfit(tasks):
     dp = [([0] * 1441) for _ in range(len(tasks) + 1)]
+    answerTracker = [([-1] * 1441) for _ in range(len(tasks) + 1)]
     for t in range(0, 1440 + 1):
         dp[-1][t] = 0
 
     # Go through every igloo/task
+    # answerTracker = len(tasks) x t
     for i in range(len(tasks)):
         # Go through every t 0->1440 inclusive
         for t in range(0, 1441):
             startTime = t - tasks[i].get_duration()
             if startTime < 0:
                 dp[i][t] = dp[i - 1][t]
+                for j in range(t + 1):
+                    answerTracker[i][j] = answerTracker[i-1][j]
             else:
                 potentialProfit = tasks[i].get_late_benefit(max(0, t - tasks[i].get_deadline()))
-                dp[i][t] = max(dp[i-1][t], potentialProfit + dp[i - 1][t])
-    return dp
+                # dp[i][t] = max(dp[i-1][t], potentialProfit + dp[i-1][startTime])
+                if (potentialProfit + dp[i-1][startTime]) > dp[i-1][t]:
+                    dp[i][t] = potentialProfit + dp[i-1][startTime]
+                    answerTracker[i] = [-1] * 1441
+                    for j in range(startTime + 1):
+                        answerTracker[i][j] = answerTracker[i-1][j]
+                    answerTracker[i][t] = (i + 1)
+                else:
+                    dp[i][t] = dp[i-1][t]
+                    for j in range(t + 1):
+                        answerTracker[i][j] = answerTracker[i-1][j]
+
+    return answerTracker[len(tasks) - 1]
 
 def goThrough(dp, res, i, t, tasks):
 
@@ -38,9 +61,9 @@ def goThrough(dp, res, i, t, tasks):
     if dp[i-1][t] == dp[i][t]:
         goThrough(dp, res, i-1, t, tasks)
     else:
-        newT = min(t, tasks[i].get_deadline()) - tasks[i].get_duration
+        newT = min(t, 1440) - tasks[i].get_duration()
         goThrough(dp, res, i - 1, newT, tasks)
-        res.append(i)
+        res[t] = i + 1
        
 
 
